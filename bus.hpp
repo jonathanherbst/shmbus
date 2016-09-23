@@ -9,14 +9,37 @@
 #include <string>
 #include <numeric>
 
+namespace detail {
+
+class mandatory_consumer_data
+{
+public:
+    mandatory_consumer_data();
+
+    unsigned int timestamp() const;
+
+    void set_timestamp_now();
+
+    void read_offset(unsigned int offset);
+
+private:
+    unsigned int m_timestamp;
+    unsigned int m_read_offset;
+};
+
+}
+
 class bus
 {
 public:
     typedef boost::interprocess::named_mutex mutex_type;
     typedef boost::interprocess::named_condition condition_type;
 
-    struct open {};
-    struct create {};
+    struct open_ {};
+    struct create_ {};
+
+    open_ open;
+    create_ create;
 
     static std::string mutex_name(const std::string& shmName);
 
@@ -24,9 +47,9 @@ public:
 
     static const boost::interprocess::offset_t data_offset;
 
-    bus(create, const std::string& name, size_t sizeExponent);
+    bus(create_, const std::string& name, size_t sizeExponent);
 
-    bus(open, const std::string& name);
+    bus(open_, const std::string& name);
 
     mutex_type& mutex();
 
