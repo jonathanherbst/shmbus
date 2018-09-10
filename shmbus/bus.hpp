@@ -56,6 +56,8 @@ public:
 
     static const ip::offset_t data_offset = sizeof(detail::meta_page);
 
+    static void destroy(const std::string& name);
+
     bus(detail::create_, const std::string& name, std::size_t sizeExponent);
 
     bus(detail::open_, const std::string& name);

@@ -21,6 +21,13 @@ read_index(read_index)
 
 }
 
+void bus::destroy(const std::string& name)
+{
+    named_mutex::remove(mutex_name(name).c_str());
+    named_condition::remove(mutex_name(name).c_str());
+    shared_memory_object::remove(name.c_str());
+}
+
 bus::bus(detail::create_, const std::string& name, size_t sizeExponent) :
 m_mutex(open_or_create, mutex_name(name).c_str()),
 m_condition(open_or_create, condition_name(name).c_str()),
