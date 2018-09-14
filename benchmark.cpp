@@ -1,5 +1,5 @@
-#include "bus_producer.hpp"
-#include "bus_consumer.hpp"
+#include <shmbus/bus_producer.hpp>
+#include <shmbus/bus_consumer.hpp>
 
 #include <string>
 #include <thread>
@@ -15,7 +15,7 @@ void producer()
     unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
     std::default_random_engine generator(seed);
     std::uniform_int_distribution<unsigned int> dist(10, 1000);
-    bus_producer p(bus::open(), name);
+    shmbus::bus_producer p(shmbus::open, name);
     uint64_t v = 0;
     uint64_t buffer[1000];
 
@@ -24,13 +24,13 @@ void producer()
         unsigned int count = dist(generator);
         for(unsigned int i(0); i < count; ++i)
             buffer[i] = v++;
-        p.write(buffer, count * sizeof(v));
+        p.write_some(buffer, count * sizeof(v));
     }
 }
 
 void consumer(uint64_t& bytesConsumed, unsigned int& badCount)
 {
-    bus_consumer c(bus::open(), name);
+    shmbus::bus_consumer c(shmbus::open, name);
     uint64_t lastV = -1;
 
     while(run)
@@ -53,7 +53,7 @@ void consumer(uint64_t& bytesConsumed, unsigned int& badCount)
 
 int main()
 {
-    bus_producer p(bus::create(), name, 20);
+    shmbus::bus_producer p(shmbus::create, name, 20);
 
     unsigned int badCount = 0;
     uint64_t bytesConsumed = 0;

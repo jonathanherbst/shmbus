@@ -1,5 +1,5 @@
 project
-:   requirements <cflags>-std=c++11
+:   requirements <cflags>-std=c++11 <include>.
 ;
 
 lib boost_system ;
@@ -8,9 +8,7 @@ lib stdc++ ;
 lib rt ;
 
 lib shmbus
-:   bus.cpp
-    bus_consumer.cpp
-    bus_producer.cpp
+:   [ glob shmbus/*.cpp ]
 ;
 
 exe quick_test

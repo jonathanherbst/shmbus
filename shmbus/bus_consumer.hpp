@@ -13,7 +13,7 @@ public:
 
     void wait(const boost::posix_time::ptime& timeout);
 
-    std::pair<const volatile void*, std::size_t> data() const;
+    std::pair<const void*, std::size_t> data() const;
 
     void consume(std::size_t s);
 

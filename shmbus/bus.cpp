@@ -10,13 +10,14 @@ namespace shmbus {
 namespace detail {
 
 mandatory_consumer_data::mandatory_consumer_data() :
-id({0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0})
+id{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
 {}
 
 mandatory_consumer_data::mandatory_consumer_data(const uint8_t* id, std::size_t read_index) :
 read_index(read_index)
 {
-    std::copy(this->id, this->id + 16, id);
+    memcpy(this->id, id, 16);
+    //std::copy(this->id, this->id + 16, id);
 }
 
 }
@@ -71,10 +72,12 @@ std::pair<void*, std::size_t> bus::write_buffer()
 {
     // find the max index from the mandatory consumers
     std::size_t max_index = m_data_size;
-    for(int i(0); i < m_meta->num_mandatory_consumers; ++i)
+    for(unsigned int i(0); i < m_meta->num_mandatory_consumers; ++i)
     {
         std::size_t read_index = m_meta->mandatory_consumers[i].read_index;
-        if(read_index > m_meta->write_index)
+        if(read_index == 0 and m_meta->write_index > 0)
+            max_index = std::min(max_index, m_data_size - 1);
+        else if(read_index > m_meta->write_index)
             max_index = std::min(max_index, read_index);
     }
 
@@ -108,18 +111,18 @@ void bus::consume_read_index(std::size_t& read_index, std::size_t bytes) const
 detail::mandatory_consumer_data* bus::open_mandatory_consumer(const uint8_t* id)
 {
     // make sure id is not zero
-    if(std::all_of(id, id + 16, [](uint8_t b) {b == 0;}))
+    if(std::all_of(id, id + 16, [](uint8_t b) {return b == 0;}))
         throw zero_id();
 
     detail::mandatory_consumer_data new_consumer_data(id, read_index());
 
     detail::mandatory_consumer_data* empty_consumer(NULL);
-    for(int i = 0; i < m_meta->max_mandatory_consumers; ++i)
+    for(unsigned int i = 0; i < m_meta->max_mandatory_consumers; ++i)
     {
         volatile detail::mandatory_consumer_data* consumer = m_meta->mandatory_consumers + i;
         if(std::equal(id, id + 16, consumer->id))
             return const_cast<detail::mandatory_consumer_data*>(consumer);
-        else if(not empty_consumer and std::all_of(consumer->id, consumer->id + 16, [](uint8_t b) {b == 0;}))
+        else if(not empty_consumer and std::all_of(consumer->id, consumer->id + 16, [](uint8_t b) {return b == 0;}))
             empty_consumer = const_cast<detail::mandatory_consumer_data*>(consumer);
     }
     *empty_consumer = new_consumer_data;

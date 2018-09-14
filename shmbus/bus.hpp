@@ -66,13 +66,13 @@ public:
 
     condition_type& condition();
 
-    std::pair<void*, std::size_t> bus::write_buffer();
+    std::pair<void*, std::size_t> write_buffer();
 
     void commit(std::size_t bytes);
 
     std::size_t read_index() const;
 
-    std::pair<const void*, std::size_t> bus::read_buffer(std::size_t read_index) const;
+    std::pair<const void*, std::size_t> read_buffer(std::size_t read_index) const;
 
     void consume_read_index(std::size_t& read_index, std::size_t bytes) const;
 

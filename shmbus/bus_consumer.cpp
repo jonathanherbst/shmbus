@@ -24,7 +24,7 @@ void bus_consumer::wait(const boost::posix_time::ptime& timeout)
     m_bus.condition().timed_wait(l, timeout);
 }
 
-std::pair<const volatile void*, std::size_t> bus_consumer::data() const
+std::pair<const void*, std::size_t> bus_consumer::data() const
 {
     return m_bus.read_buffer(m_read_index);
 }
