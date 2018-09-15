@@ -1,0 +1,16 @@
+import testing ;
+
+lib boost_unit_test_framework ;
+lib boost_test_exec_monitor ;
+lib pthread ;
+lib rt ;
+
+unit-test tests
+:   [ glob *.cpp ]
+    /shmbus//shmbus
+    boost_unit_test_framework
+    boost_test_exec_monitor
+    pthread
+    rt
+:   <hardcode-dll-paths>true
+;

@@ -72,13 +72,17 @@ std::pair<void*, std::size_t> bus::write_buffer()
 {
     // find the max index from the mandatory consumers
     std::size_t max_index = m_data_size;
-    for(unsigned int i(0); i < m_meta->num_mandatory_consumers; ++i)
+    for(unsigned int i(0); i < m_meta->max_mandatory_consumers; ++i)
     {
-        std::size_t read_index = m_meta->mandatory_consumers[i].read_index;
-        if(read_index == 0 and m_meta->write_index > 0)
-            max_index = std::min(max_index, m_data_size - 1);
-        else if(read_index > m_meta->write_index)
-            max_index = std::min(max_index, read_index);
+        auto* consumer = m_meta->mandatory_consumers + i;
+        if(not std::all_of(consumer->id, consumer->id + 16, [](uint8_t v){return v == 0;}))
+        {
+            std::size_t read_index = consumer->read_index;
+            if(read_index == 0 and m_meta->write_index >= 0)
+                max_index = std::min(max_index, m_data_size - 1);
+            else if(read_index > m_meta->write_index)
+                max_index = std::min(max_index, read_index - 1);
+        }
     }
 
     void* buffer = static_cast<uint8_t*>(m_data) + m_meta->write_index;
