@@ -4,12 +4,12 @@
 
 namespace shmbus {
 
-class bus_producer
+class producer
 {
 public:
-    bus_producer(detail::create_, const std::string& name, std::size_t size_exponent);
+    producer(detail::create_, const std::string& name, std::size_t size_exponent);
 
-    bus_producer(detail::open_, const std::string& name);
+    producer(detail::open_, const std::string& name);
 
     std::size_t write_some(const void* data, size_t len);
 

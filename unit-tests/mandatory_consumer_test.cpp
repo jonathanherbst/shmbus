@@ -1,5 +1,5 @@
-#include <shmbus/bus_producer.hpp>
-#include <shmbus/mandatory_bus_consumer.hpp>
+#include <shmbus/producer.hpp>
+#include <shmbus/mandatory_consumer.hpp>
 
 #define BOOST_TEST_DYN_LINK
 #include <boost/test/unit_test.hpp>
@@ -14,8 +14,8 @@ BOOST_AUTO_TEST_CASE(MandatoryConsumerPreventsProducer)
     uint8_t data[1024];
 
     {
-        shmbus::bus_producer producer(shmbus::create, "test", 5);
-        shmbus::mandatory_bus_consumer consumer(shmbus::open, "test", mcId);
+        shmbus::producer producer(shmbus::create, "test", 5);
+        shmbus::mandatory_consumer consumer(shmbus::open, "test", mcId);
 
         BOOST_CHECK_GT(producer.write_some(data, sizeof(data)), 0);
         BOOST_CHECK_EQUAL(producer.write_some(data, sizeof(data)),  0);

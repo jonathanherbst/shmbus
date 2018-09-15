@@ -4,12 +4,12 @@
 
 namespace shmbus {
 
-class bus_consumer
+class consumer
 {
 public:
-    bus_consumer(detail::create_, const std::string& name, std::size_t size_exponent);
+    consumer(detail::create_, const std::string& name, std::size_t size_exponent);
 
-    bus_consumer(detail::open_, const std::string& name);
+    consumer(detail::open_, const std::string& name);
 
     void wait(const boost::posix_time::ptime& timeout);
 

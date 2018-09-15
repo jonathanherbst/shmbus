@@ -1,5 +1,6 @@
 #include "bus.hpp"
 #include "errors.hpp"
+#include "util.hpp"
 
 #include <algorithm>
 
@@ -43,7 +44,7 @@ m_mem(open_or_create, name.c_str(), read_write)
     m_region = mapped_region(m_mem, read_write);
     m_meta = new(m_region.get_address()) volatile detail::meta_page;
     m_data = static_cast<uint8_t*>(m_region.get_address()) + sizeof(detail::meta_page);
-    m_data_size = m_region.get_size() - sizeof(detail::meta_page);
+    m_data_size = detail::pow2RoundDown(m_region.get_size() - sizeof(detail::meta_page));
     m_data_size_mask = m_data_size - 1;
 }
 
@@ -54,9 +55,14 @@ m_mem(open_only, name.c_str(), read_write),
 m_region(m_mem, read_write),
 m_meta(static_cast<volatile detail::meta_page*>(m_region.get_address())),
 m_data(static_cast<uint8_t*>(m_region.get_address()) + sizeof(detail::meta_page)),
-m_data_size(m_region.get_size() - sizeof(detail::meta_page)),
+m_data_size(detail::pow2RoundDown(m_region.get_size() - sizeof(detail::meta_page))),
 m_data_size_mask(m_data_size - 1)
 {}
+
+std::size_t bus::capacity() const
+{
+    return m_data_size;
+}
 
 bus::mutex_type& bus::mutex()
 {

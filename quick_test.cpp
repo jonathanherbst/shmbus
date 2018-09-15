@@ -1,5 +1,5 @@
-#include <shmbus/bus_producer.hpp>
-#include <shmbus/bus_consumer.hpp>
+#include <shmbus/producer.hpp>
+#include <shmbus/consumer.hpp>
 
 #include <boost/thread/thread_time.hpp>
 
@@ -15,7 +15,7 @@ std::string data("0123456789");
 
 void producer()
 {
-    shmbus::bus_producer p(shmbus::open, name);
+    shmbus::producer p(shmbus::open, name);
     while(true)
     {
         p.write_some(data.data(), data.size());
@@ -44,7 +44,7 @@ bool numeric_ordered(const char* data, unsigned int size)
 
 void consumer()
 {
-    shmbus::bus_consumer c(shmbus::open, name);
+    shmbus::consumer c(shmbus::open, name);
     while(true)
     {
         const void* data;
@@ -65,7 +65,7 @@ void consumer()
 
 int main()
 {
-    shmbus::bus_producer p(shmbus::create, name, 10);
+    shmbus::producer p(shmbus::create, name, 10);
 
     std::vector<std::thread> ps;
 

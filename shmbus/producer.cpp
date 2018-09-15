@@ -1,19 +1,20 @@
-#include "bus_producer.hpp"
+#include "producer.hpp"
 
 #include <cassert>
 
 namespace shmbus {
 
-bus_producer::bus_producer(detail::create_ m, const std::string& name, std::size_t size_exponent) :
+producer::producer(detail::create_ m, const std::string& name, std::size_t size_exponent) :
 m_bus(m, name, size_exponent)
 {}
 
-bus_producer::bus_producer(detail::open_ m, const std::string& name) :
+producer::producer(detail::open_ m, const std::string& name) :
 m_bus(m, name)
 {}
 
-std::size_t bus_producer::write_some(const void* data, std::size_t len)
+std::size_t producer::write_some(const void* data, std::size_t len)
 {
+    len = std::min(len, m_bus.capacity());
     boost::interprocess::scoped_lock<bus::mutex_type> lock(m_bus.mutex());
     void* buffer;
     std::size_t buffer_size;
@@ -36,7 +37,7 @@ std::size_t bus_producer::write_some(const void* data, std::size_t len)
     return write_size;
 }
 
-const bus& bus_producer::get_bus() const
+const bus& producer::get_bus() const
 {
     return m_bus;
 }

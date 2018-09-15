@@ -15,5 +15,13 @@ struct fake_mutex
     void unlock() {}
 };
 
+template<typename T>
+T pow2RoundDown(T v)
+{
+    for(T i = 1; (v & ~i) > 0; i <<= 1)
+        v &= ~i;
+    return v;
+}
+
 }
 }

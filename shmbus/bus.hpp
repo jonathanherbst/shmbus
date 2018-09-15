@@ -62,6 +62,8 @@ public:
 
     bus(detail::open_, const std::string& name);
 
+    std::size_t capacity() const;
+
     mutex_type& mutex();
 
     condition_type& condition();
