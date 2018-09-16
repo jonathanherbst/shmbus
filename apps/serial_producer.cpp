@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 {
     if(argc < 4 or argc > 5)
     {
-        std::cout << "Usage: " << std::string(argv[0]) << " <bus_name> <serial_path> <baud_rate> [hwfc]" << std::end;
+        std::cout << "Usage: " << std::string(argv[0]) << " <bus_name> <serial_path> <baud_rate> [hwfc]" << std::endl;
         return 1;
     }
 

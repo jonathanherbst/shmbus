@@ -55,6 +55,7 @@
         "utility": "cpp",
         "optional": "cpp",
         "string_view": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "strstream": "cpp"
     }
 }
