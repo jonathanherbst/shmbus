@@ -1,5 +1,6 @@
 project
 :   requirements <cflags>-std=c++11 <include>.
+:   build-dir build
 ;
 
 lib boost_system ;
