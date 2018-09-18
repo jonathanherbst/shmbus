@@ -1,0 +1,28 @@
+lib boost_system ;
+
+lib pthread ;
+lib rt ;
+
+exe serial_producer
+:   serial_producer.cpp
+    /shmbus//shmbus
+    boost_system
+    pthread
+    rt
+;
+
+exe tcp_consumer
+:   tcp_consumer.cpp
+    /shmbus//shmbus
+    boost_system
+    pthread
+    rt
+;
+
+exe udp_consumer
+:   udp_consumer.cpp
+    /shmbus//shmbus
+    boost_system
+    pthread
+    rt
+;

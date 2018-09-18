@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 
 #include <shmbus/producer.hpp>
 #include <shmbus/consumer.hpp>
@@ -36,15 +37,15 @@ private:
     std::array<uint8_t, 4096> m_buffer;
     asio::mutable_buffer m_bufferPtr;
 
-    void rxCallback(const boost::system::error_code& error, unsigned int bytesTransferred)
+    void rxCallback(const boost::system::error_code& error, std::size_t bytesTransferred)
     {
         if(not error)
         {
-            unsigned int bytesWritten = m_rxBus.write_some(asio::buffer_cast<const void*>(m_bufferPtr), bytesTransferred);
+            std::size_t bytesWritten = m_rxBus.write_some(asio::buffer_cast<const void*>(m_bufferPtr), bytesTransferred);
             if(bytesWritten < bytesTransferred)
             {
                 m_bufferPtr = m_bufferPtr + bytesWritten;
-                asio::post(m_socket.get_io_context(), std::bind(&UDPServer::rxCallback, this, error, bytesTransferred - bytesWritten));
+                asio::post(m_socket.get_io_context(), boost::bind(&UDPServer::rxCallback, this, error, bytesTransferred - bytesWritten));
             }
             else
             {
@@ -73,24 +74,24 @@ private:
     void transmitOrWait()
     {
         const void* data;
-        unsigned int dataSize;
+        std::size_t dataSize;
         std::tie(data, dataSize) = m_txBus.data();
 
         if(dataSize > 0)
         {
-            m_socket.async_send(asio::buffer(data, dataSize), std::bind(&UDPServer::txCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
+            m_socket.async_send(asio::buffer(data, dataSize), boost::bind(&UDPServer::txCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
         }
         else
         {
             m_timer.expires_after(std::chrono::milliseconds(10));
-            m_timer.async_wait(std::bind(&UDPServer::timeoutCallback, this, asio::placeholders::error));
+            m_timer.async_wait(boost::bind(&UDPServer::timeoutCallback, this, asio::placeholders::error));
         }
     }
 
     void receive()
     {
         m_bufferPtr = asio::buffer(m_buffer.data(), m_buffer.size());
-        m_socket.async_receive(m_bufferPtr, std::bind(&UDPServer::rxCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
+        m_socket.async_receive(m_bufferPtr, boost::bind(&UDPServer::rxCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
     }
 };
 

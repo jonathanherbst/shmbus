@@ -1,5 +1,5 @@
 project
-:   requirements <cflags>-std=c++11 <include>.
+:   requirements <include>.
 :   build-dir build
 ;
 

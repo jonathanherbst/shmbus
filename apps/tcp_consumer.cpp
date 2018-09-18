@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 
 #include <shmbus/producer.hpp>
 #include <shmbus/consumer.hpp>
@@ -39,15 +40,15 @@ private:
     std::array<uint8_t, 4096> m_buffer;
     asio::mutable_buffer m_bufferPtr;
 
-    void rxCallback(const boost::system::error_code& error, unsigned int bytesTransmitted)
+    void rxCallback(const boost::system::error_code& error, std::size_t bytesTransmitted)
     {
         if(not error)
         {
-            unsigned int bytesWritten = m_rxBus.write_some(asio::buffer_cast<const void*>(m_bufferPtr), bytesTransmitted);
+            std::size_t bytesWritten = m_rxBus.write_some(asio::buffer_cast<const void*>(m_bufferPtr), bytesTransmitted);
             if(bytesWritten < bytesTransmitted)
             {
                 m_bufferPtr = m_bufferPtr + bytesWritten;
-                asio::post(m_socket.get_io_context(), std::bind(&TCPClient::rxCallback, shared_from_this(), error, bytesTransmitted - bytesWritten));
+                asio::post(m_socket.get_io_context(), boost::bind(&TCPClient::rxCallback, shared_from_this(), error, bytesTransmitted - bytesWritten));
             }
             else
             {
@@ -76,24 +77,24 @@ private:
     void transmitOrWait()
     {
         const void* data;
-        unsigned int dataSize;
+        std::size_t dataSize;
         std::tie(data, dataSize) = m_txBus->data();
 
         if(dataSize > 0)
         {
-            m_socket.async_write_some(asio::buffer(data, dataSize), std::bind(&TCPClient::txCallback, shared_from_this(), asio::placeholders::error, asio::placeholders::bytes_transferred));
+            m_socket.async_write_some(asio::buffer(data, dataSize), boost::bind(&TCPClient::txCallback, shared_from_this(), asio::placeholders::error, asio::placeholders::bytes_transferred));
         }
         else
         {
             m_timer.expires_after(std::chrono::milliseconds(10));
-            m_timer.async_wait(std::bind(&TCPClient::timeout, shared_from_this(), asio::placeholders::error));
+            m_timer.async_wait(boost::bind(&TCPClient::timeout, shared_from_this(), asio::placeholders::error));
         }
     }
 
     void receive()
     {
         m_bufferPtr = asio::buffer(m_buffer.data(), m_buffer.size());
-        m_socket.async_read_some(m_bufferPtr, std::bind(&TCPClient::rxCallback, shared_from_this(), asio::placeholders::error, asio::placeholders::bytes_transferred));
+        m_socket.async_read_some(m_bufferPtr, boost::bind(&TCPClient::rxCallback, shared_from_this(), asio::placeholders::error, asio::placeholders::bytes_transferred));
     }
 };
 
@@ -163,13 +164,13 @@ private:
     void acceptV4()
     {
         m_nextV4Client.reset(new TCPClient(m_v4Acceptor.get_io_context(), m_rxBus));
-        m_v4Acceptor.async_accept(m_nextV4Client->socket(), std::bind(&TCPServer::acceptV4Callback, this, asio::placeholders::error));
+        m_v4Acceptor.async_accept(m_nextV4Client->socket(), boost::bind(&TCPServer::acceptV4Callback, this, asio::placeholders::error));
     }
 
     void acceptV6()
     {
         m_nextV6Client.reset(new TCPClient(m_v6Acceptor.get_io_context(), m_rxBus));
-        m_v6Acceptor.async_accept(m_nextV6Client->socket(), std::bind(&TCPServer::acceptV6Callback, this, asio::placeholders::error));
+        m_v6Acceptor.async_accept(m_nextV6Client->socket(), boost::bind(&TCPServer::acceptV6Callback, this, asio::placeholders::error));
     }
 };
 

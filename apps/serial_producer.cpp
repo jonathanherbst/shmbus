@@ -1,4 +1,5 @@
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 
 #include <shmbus/producer.hpp>
 #include <shmbus/mandatory_consumer.hpp>
@@ -16,7 +17,7 @@ public:
     m_producer(producer),
     m_bufferPtr(asio::buffer(m_buffer))
     {
-        m_port.async_read_some(m_bufferPtr, std::bind(&SerialPortReader::rxCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
+        m_port.async_read_some(m_bufferPtr, boost::bind(&SerialPortReader::rxCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
     }
 
 private:
@@ -25,20 +26,20 @@ private:
     std::array<uint8_t, 4096> m_buffer;
     asio::mutable_buffer m_bufferPtr;
 
-    void rxCallback(const boost::system::error_code& error, unsigned int bytesTransferred)
+    void rxCallback(const boost::system::error_code& error, std::size_t bytesTransferred)
     {
         if(not error)
         {
-            unsigned int bytesWritten = m_producer.write_some(asio::buffer_cast<const void*>(m_bufferPtr), bytesTransferred);
+            std::size_t bytesWritten = m_producer.write_some(asio::buffer_cast<const void*>(m_bufferPtr), bytesTransferred);
             if(bytesWritten < bytesTransferred)
             {
                 m_bufferPtr = m_bufferPtr + bytesWritten;
-                asio::post(m_port.get_io_context(), std::bind(&SerialPortReader::rxCallback, this, error, bytesTransferred - bytesWritten));
+                asio::post(m_port.get_io_context(), boost::bind(&SerialPortReader::rxCallback, this, error, bytesTransferred - bytesWritten));
             }
             else
             {
                 m_bufferPtr = asio::buffer(m_buffer);
-                m_port.async_read_some(m_bufferPtr, std::bind(&SerialPortReader::rxCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
+                m_port.async_read_some(m_bufferPtr, boost::bind(&SerialPortReader::rxCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
             }
         }
     }
@@ -60,7 +61,7 @@ private:
     shmbus::mandatory_consumer& m_consumer;
     asio::steady_timer m_timer;
 
-    void txCallback(const boost::system::error_code& error, unsigned int bytesTransferred)
+    void txCallback(const boost::system::error_code& error, std::size_t bytesTransferred)
     {
         if(not error)
         {
@@ -80,14 +81,14 @@ private:
     void transmitOrWait()
     {
         const void* data;
-        unsigned int dataSize;
+        std::size_t dataSize;
         std::tie(data, dataSize) = m_consumer.data();
         if(dataSize > 0)
-            m_port.async_write_some(asio::buffer(data, dataSize), std::bind(&SerialPortWriter::txCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
+            m_port.async_write_some(asio::buffer(data, dataSize), boost::bind(&SerialPortWriter::txCallback, this, asio::placeholders::error, asio::placeholders::bytes_transferred));
         else
         {
             m_timer.expires_after(std::chrono::milliseconds(10));
-            m_timer.async_wait(std::bind(&SerialPortWriter::timeout, this, asio::placeholders::error));
+            m_timer.async_wait(boost::bind(&SerialPortWriter::timeout, this, asio::placeholders::error));
         }
     }
 };
