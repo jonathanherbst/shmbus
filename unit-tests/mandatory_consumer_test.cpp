@@ -17,8 +17,8 @@ BOOST_AUTO_TEST_CASE(MandatoryConsumerPreventsProducer)
         shmbus::producer producer(shmbus::create, "test", 5);
         shmbus::mandatory_consumer consumer(shmbus::open, "test", mcId);
 
-        BOOST_CHECK_GT(producer.write_some(data, sizeof(data)), 0);
-        BOOST_CHECK_EQUAL(producer.write_some(data, sizeof(data)),  0);
+        BOOST_CHECK_GT(producer.write_some(data, sizeof(data)), 0ul);
+        BOOST_CHECK_EQUAL(producer.write_some(data, sizeof(data)),  0ul);
     }
 
     shmbus::bus::destroy("test");
