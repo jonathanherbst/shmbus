@@ -33,7 +33,7 @@ private:
             if(bytesWritten < bytesTransferred)
             {
                 m_bufferPtr = m_bufferPtr + bytesWritten;
-                m_port.get_io_service().post(std::bind(&SerialPortReader::rxCallback, this, error, bytesTransferred - bytesWritten));
+                asio::post(m_port.get_io_context(), std::bind(&SerialPortReader::rxCallback, this, error, bytesTransferred - bytesWritten));
             }
             else
             {
@@ -50,7 +50,7 @@ public:
     SerialPortWriter(asio::serial_port& port, shmbus::mandatory_consumer& consumer) :
     m_port(port),
     m_consumer(consumer),
-    m_timer(port.get_io_service())
+    m_timer(port.get_io_context())
     {
         transmitOrWait();
     }
@@ -95,8 +95,8 @@ private:
 void run_forever(const std::string& busName, const std::string& path, unsigned int baudRate,
     asio::serial_port::flow_control::type flowControl = asio::serial_port::flow_control::none)
 {
-    asio::io_service ioService;
-    asio::serial_port serial(ioService, path);
+    asio::io_context ioContext;
+    asio::serial_port serial(ioContext, path);
     serial.set_option(asio::serial_port::baud_rate(baudRate));
     serial.set_option(asio::serial_port::flow_control(flowControl));
 
@@ -109,7 +109,7 @@ void run_forever(const std::string& busName, const std::string& path, unsigned i
 
     SerialPortReader reader(serial, rxBus);
     SerialPortWriter writer(serial, txBus);
-    ioService.run();
+    ioContext.run();
 }
 
 int main(int argc, char* argv[])

@@ -13,9 +13,9 @@ namespace asio = boost::asio;
 class TCPClient : public std::enable_shared_from_this<TCPClient>
 {
 public:
-    TCPClient(asio::io_service& ioService, shmbus::producer& rxBus) :
-    m_socket(ioService),
-    m_timer(ioService),
+    TCPClient(asio::io_context& ioContext, shmbus::producer& rxBus) :
+    m_socket(ioContext),
+    m_timer(ioContext),
     m_rxBus(rxBus)
     {}
 
@@ -47,7 +47,7 @@ private:
             if(bytesWritten < bytesTransmitted)
             {
                 m_bufferPtr = m_bufferPtr + bytesWritten;
-                m_socket.get_io_service().post(std::bind(&TCPClient::rxCallback, shared_from_this(), error, bytesTransmitted - bytesWritten));
+                asio::post(m_socket.get_io_context(), std::bind(&TCPClient::rxCallback, shared_from_this(), error, bytesTransmitted - bytesWritten));
             }
             else
             {
@@ -100,11 +100,11 @@ private:
 class TCPServer
 {
 public:
-    TCPServer(asio::io_service& ioService, shmbus::producer& rxBus, const std::string& txBusName, uint16_t port, unsigned int maxConnections) :
+    TCPServer(asio::io_context& ioContext, shmbus::producer& rxBus, const std::string& txBusName, uint16_t port, unsigned int maxConnections) :
     m_v4Endpoint(asio::ip::tcp::v4(), port),
     m_v6Endpoint(asio::ip::tcp::v6(), port),
-    m_v4Acceptor(ioService, m_v4Endpoint),
-    m_v6Acceptor(ioService, m_v6Endpoint),
+    m_v4Acceptor(ioContext, m_v4Endpoint),
+    m_v6Acceptor(ioContext, m_v6Endpoint),
     m_rxBus(rxBus),
     m_txBusName(txBusName),
     m_maxClients(maxConnections)
@@ -162,13 +162,13 @@ private:
 
     void acceptV4()
     {
-        m_nextV4Client.reset(new TCPClient(m_v4Acceptor.get_io_service(), m_rxBus));
+        m_nextV4Client.reset(new TCPClient(m_v4Acceptor.get_io_context(), m_rxBus));
         m_v4Acceptor.async_accept(m_nextV4Client->socket(), std::bind(&TCPServer::acceptV4Callback, this, asio::placeholders::error));
     }
 
     void acceptV6()
     {
-        m_nextV6Client.reset(new TCPClient(m_v6Acceptor.get_io_service(), m_rxBus));
+        m_nextV6Client.reset(new TCPClient(m_v6Acceptor.get_io_context(), m_rxBus));
         m_v6Acceptor.async_accept(m_nextV6Client->socket(), std::bind(&TCPServer::acceptV6Callback, this, asio::placeholders::error));
     }
 };
@@ -190,8 +190,8 @@ int main(int argc, char* argv[])
 
     std::string txBusName = busName + "_tx";
 
-    asio::io_service ioService;
-    TCPServer server(ioService, rxBus, txBusName, port, maxConnections);
+    asio::io_context ioContext;
+    TCPServer server(ioContext, rxBus, txBusName, port, maxConnections);
 
-    ioService.run();
+    ioContext.run();
 }

@@ -11,10 +11,10 @@ namespace asio = boost::asio;
 class UDPServer
 {
 public:
-    UDPServer(asio::io_service& ioService, shmbus::producer& rxBus, shmbus::consumer& txBus, const std::string ipAddress, uint16_t port) :
+    UDPServer(asio::io_context& ioContext, shmbus::producer& rxBus, shmbus::consumer& txBus, const std::string ipAddress, uint16_t port) :
     m_endpoint(asio::ip::make_address(ipAddress), port),
-    m_socket(ioService, m_endpoint),
-    m_timer(ioService),
+    m_socket(ioContext, m_endpoint),
+    m_timer(ioContext),
     m_rxBus(rxBus),
     m_txBus(txBus)
     {
@@ -44,7 +44,7 @@ private:
             if(bytesWritten < bytesTransferred)
             {
                 m_bufferPtr = m_bufferPtr + bytesWritten;
-                m_socket.get_io_service().post(std::bind(&UDPServer::rxCallback, this, error, bytesTransferred - bytesWritten));
+                asio::post(m_socket.get_io_context(), std::bind(&UDPServer::rxCallback, this, error, bytesTransferred - bytesWritten));
             }
             else
             {
@@ -112,13 +112,13 @@ int main(int argc, char* argv[])
     std::string txBusName = busName + "_tx";
     shmbus::consumer txBus(shmbus::open, txBusName);
 
-    asio::io_service ioService;
-    UDPServer server(ioService, rxBus, txBus, ipAddress, port);
+    asio::io_context ioContext;
+    UDPServer server(ioContext, rxBus, txBus, ipAddress, port);
 
     if(server.endpoint().address().is_multicast())
     {
         asio::ip::multicast::join_group(server.endpoint().address());
     }
 
-    ioService.run();
+    ioContext.run();
 }
