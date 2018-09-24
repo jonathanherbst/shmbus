@@ -5,3 +5,5 @@ project
 
 use-project /shmbus : shmbus ;
 
+PREFIX = [ MATCH ^--prefix=(.*) : $(argv) ] ;
+PREFIX ?= "/usr" ;

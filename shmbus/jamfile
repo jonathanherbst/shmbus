@@ -1,3 +1,8 @@
 lib shmbus
 :   [ glob *.cpp ]
 ;
+
+alias install : install-lib install-headers ;
+
+install install-lib : shmbus : $(PREFIX)/lib ;
+install install-headers : [ glob *.hpp ] : $(PREFIX)/include/shmbus ;
