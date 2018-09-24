@@ -2,7 +2,15 @@ lib shmbus
 :   [ glob *.cpp ]
 ;
 
+rule prefix
+{
+    local argv = [ modules.peek : ARGV ] ;
+    return [ MATCH ^--prefix=(.*) : $(argv) ] ;
+}
+PREFIX = [ prefix ] ;
+PREFIX ?= "/usr" ;
+
 alias install : install-lib install-headers ;
 
-install install-lib : shmbus : $(PREFIX)/lib ;
-install install-headers : [ glob *.hpp ] : $(PREFIX)/include/shmbus ;
+install install-lib : shmbus : <location>$(PREFIX)/lib ;
+install install-headers : [ glob *.hpp ] : <location>$(PREFIX)/include/shmbus ;
