@@ -32,7 +32,7 @@ void consumer::wait_for(const std::chrono::microseconds& timeout)
     wait(boost::get_system_time() + boost::posix_time::microseconds(timeout.count()));
 }
 
-void mandatory_consumer::wait_for_data(const std::chrono::microseconds& timeout)
+void consumer::wait_for_data(const std::chrono::microseconds& timeout)
 {
     boost::posix_time::ptime wait_time(boost::get_system_time() +
         boost::posix_time::microseconds(timeout.count()));

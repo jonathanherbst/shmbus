@@ -3,7 +3,7 @@
 #include <boost/interprocess/shared_memory_object.hpp>
 #include <boost/interprocess/mapped_region.hpp>
 #include <boost/interprocess/sync/named_sharable_mutex.hpp>
-#include <boost/interprocess/sync/named_condition.hpp>
+#include <boost/interprocess/sync/named_condition_any.hpp>
 
 #include <string>
 #include <numeric>
@@ -51,7 +51,7 @@ class bus
 {
 public:
     typedef ip::named_sharable_mutex mutex_type;
-    typedef ip::named_condition condition_type;
+    typedef ip::named_condition_any condition_type;
 
     static const ip::offset_t data_offset = sizeof(detail::meta_page);
 
