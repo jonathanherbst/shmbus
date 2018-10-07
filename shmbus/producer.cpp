@@ -1,5 +1,7 @@
 #include "producer.hpp"
 
+#include <boost/interprocess/sync/scoped_lock.hpp>
+
 #include <cassert>
 
 namespace shmbus {

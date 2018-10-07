@@ -2,6 +2,8 @@
 #include "errors.hpp"
 #include "util.hpp"
 
+#include <boost/interprocess/sync/scoped_lock.hpp>
+
 #include <algorithm>
 
 using namespace boost::interprocess;

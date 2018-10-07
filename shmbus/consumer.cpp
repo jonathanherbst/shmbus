@@ -2,6 +2,7 @@
 #include "util.hpp"
 
 #include <boost/thread/thread_time.hpp>
+#include <boost/interprocess/sync/sharable_lock.hpp>
 
 namespace {
 
@@ -29,6 +30,16 @@ void consumer::wait(const boost::posix_time::ptime& timeout)
 void consumer::wait_for(const std::chrono::microseconds& timeout)
 {
     wait(boost::get_system_time() + boost::posix_time::microseconds(timeout.count()));
+}
+
+void mandatory_consumer::wait_for_data(const std::chrono::microseconds& timeout)
+{
+    boost::posix_time::ptime wait_time(boost::get_system_time() +
+        boost::posix_time::microseconds(timeout.count()));
+    boost::interprocess::sharable_lock<bus::mutex_type> l(m_bus.mutex());
+    if(data().second > 0)
+        return;
+    m_bus.condition().timed_wait(l, wait_time);
 }
 
 std::pair<const void*, std::size_t> consumer::data() const
