@@ -2,6 +2,8 @@
 
 #include "bus.hpp"
 
+#include <chrono>
+
 namespace shmbus {
 
 class consumer
@@ -12,6 +14,8 @@ public:
     consumer(detail::open_, const std::string& name);
 
     void wait(const boost::posix_time::ptime& timeout);
+
+    void wait_for(const std::chrono::microseconds& timeout);
 
     std::pair<const void*, std::size_t> data() const;
 

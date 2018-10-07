@@ -1,6 +1,8 @@
 #include "consumer.hpp"
 #include "util.hpp"
 
+#include <boost/thread/thread_time.hpp>
+
 namespace {
 
 }
@@ -22,6 +24,11 @@ void consumer::wait(const boost::posix_time::ptime& timeout)
     detail::fake_mutex m;
     boost::interprocess::scoped_lock<detail::fake_mutex> l(m);
     m_bus.condition().timed_wait(l, timeout);
+}
+
+void consumer::wait_for(const std::chrono::microseconds& timeout)
+{
+    wait(boost::get_system_time() + boost::posix_time::microseconds(timeout.count()));
 }
 
 std::pair<const void*, std::size_t> consumer::data() const

@@ -2,6 +2,8 @@
 
 #include "bus.hpp"
 
+#include <chrono>
+
 namespace shmbus {
 
 class mandatory_consumer
@@ -18,6 +20,8 @@ public:
     mandatory_consumer& operator=(const mandatory_consumer&) = delete;
 
     void wait(const boost::posix_time::ptime& timeout);
+
+    void wait_for(const std::chrono::microseconds& timeout);
 
     std::pair<const void*, std::size_t> data() const;
 

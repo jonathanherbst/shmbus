@@ -2,6 +2,8 @@
 #include "errors.hpp"
 #include "util.hpp"
 
+#include <boost/thread/thread_time.hpp>
+
 namespace shmbus {
 
 mandatory_consumer::mandatory_consumer(detail::create_ m, const std::string& bus_name, std::size_t size_exponent, const uint8_t* id) :
@@ -33,6 +35,11 @@ void mandatory_consumer::wait(const boost::posix_time::ptime& timeout)
     detail::fake_mutex m;
     boost::interprocess::scoped_lock<detail::fake_mutex> l(m);
     m_bus.condition().timed_wait(l, timeout);
+}
+
+void mandatory_consumer::wait_for(const std::chrono::microseconds& timeout)
+{
+    wait(boost::get_system_time() + boost::posix_time::microseconds(timeout.count()));
 }
 
 std::pair<const void*, std::size_t> mandatory_consumer::data() const
