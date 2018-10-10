@@ -13,4 +13,6 @@ PREFIX ?= "/usr" ;
 alias install : install-lib install-headers ;
 
 install install-lib : shmbus : <location>$(PREFIX)/lib ;
+explicit install-lib ;
 install install-headers : [ glob *.hpp ] : <location>$(PREFIX)/include/shmbus ;
+explicit install-headers ;
