@@ -46,3 +46,10 @@ exe benchmark_unix_socket
     boost_system
     pthread
 ;
+
+exe make_bus
+:   make_bus.cpp
+    /shmbus//shmbus
+    pthread
+    rt
+;
