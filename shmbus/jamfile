@@ -11,6 +11,7 @@ PREFIX = [ prefix ] ;
 PREFIX ?= "/usr" ;
 
 alias install : install-lib install-headers ;
+explicit install ;
 
 install install-lib : shmbus : <location>$(PREFIX)/lib ;
 explicit install-lib ;
