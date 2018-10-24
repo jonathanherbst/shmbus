@@ -147,6 +147,11 @@ void bus::close_mandatory_consumer(const detail::mandatory_consumer_data* data)
     std::fill(consumer->id, consumer->id + 16, 0);
 }
 
+const volatile detail::meta_page* bus::meta_page() const
+{
+    return m_meta;
+}
+
 std::string bus::mutex_name(const std::string& shmName)
 {
     return shmName + "_mutex";

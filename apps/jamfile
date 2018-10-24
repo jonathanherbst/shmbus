@@ -3,6 +3,13 @@ lib boost_system ;
 lib pthread ;
 lib rt ;
 
+exe bus_info
+:   bus_info.cpp
+    /shmbus//shmbus
+    pthread
+    rt
+;
+
 exe serial_producer
 :   serial_producer.cpp
     /shmbus//shmbus

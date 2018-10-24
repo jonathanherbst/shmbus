@@ -81,6 +81,8 @@ public:
 
     void close_mandatory_consumer(const detail::mandatory_consumer_data* data);
 
+    const volatile detail::meta_page* meta_page() const;
+
 private:
     mutex_type m_mutex;
     condition_type m_condition;
