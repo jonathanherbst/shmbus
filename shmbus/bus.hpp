@@ -17,12 +17,12 @@ namespace detail {
 struct mandatory_consumer_data
 {
 public:
-    uint8_t id[16];
+    uint8_t id;
     std::size_t read_index;
 
     mandatory_consumer_data();
 
-    mandatory_consumer_data(const uint8_t* id, std::size_t read_index);
+    mandatory_consumer_data(uint8_t id, std::size_t read_index);
 };
 
 struct meta_page
@@ -35,7 +35,6 @@ struct meta_page
     {}
 
     std::size_t write_index;
-    std::size_t num_mandatory_consumers;
     mandatory_consumer_data mandatory_consumers[max_mandatory_consumers];
 };
 
@@ -75,11 +74,11 @@ public:
 
     std::pair<const void*, std::size_t> read_buffer(std::size_t read_index) const;
 
-    void consume_read_index(std::size_t& read_index, std::size_t bytes) const;
+    std::size_t consume_read_index(std::size_t read_index, std::size_t bytes) const;
 
-    detail::mandatory_consumer_data* open_mandatory_consumer(const uint8_t* id);
+    volatile detail::mandatory_consumer_data* open_mandatory_consumer(uint8_t id);
 
-    void close_mandatory_consumer(const detail::mandatory_consumer_data* data);
+    void close_mandatory_consumer(const volatile detail::mandatory_consumer_data* data);
 
     const volatile detail::meta_page* meta_page() const;
 

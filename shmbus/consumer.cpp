@@ -49,7 +49,7 @@ std::pair<const void*, std::size_t> consumer::data() const
 
 void consumer::consume(std::size_t s)
 {
-    m_bus.consume_read_index(m_read_index, s);
+    m_read_index = m_bus.consume_read_index(m_read_index, s);
 }
 
 unsigned int consumer::read_index() const

@@ -8,7 +8,7 @@
 
 namespace shmbus {
 
-mandatory_consumer::mandatory_consumer(detail::create_ m, const std::string& bus_name, std::size_t size_exponent, const uint8_t* id) :
+mandatory_consumer::mandatory_consumer(detail::create_ m, const std::string& bus_name, std::size_t size_exponent, uint8_t id) :
 m_bus(m, bus_name, size_exponent)
 {
     boost::interprocess::scoped_lock<bus::mutex_type> lock(m_bus.mutex());
@@ -17,7 +17,7 @@ m_bus(m, bus_name, size_exponent)
         throw out_of_mandatory_consumers();
 }
 
-mandatory_consumer::mandatory_consumer(detail::open_ m, const std::string& bus_name, const uint8_t* id):
+mandatory_consumer::mandatory_consumer(detail::open_ m, const std::string& bus_name, uint8_t id):
 m_bus(m, bus_name)
 {
     boost::interprocess::scoped_lock<bus::mutex_type> lock(m_bus.mutex());
@@ -61,7 +61,7 @@ std::pair<const void*, std::size_t> mandatory_consumer::data() const
 
 void mandatory_consumer::consume(std::size_t s)
 {
-    m_bus.consume_read_index(m_data->read_index, s);
+    m_data->read_index = m_bus.consume_read_index(m_data->read_index, s);
 }
 
 const bus& mandatory_consumer::get_bus() const

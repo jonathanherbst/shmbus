@@ -115,36 +115,34 @@ std::pair<const void*, std::size_t> bus::read_buffer(std::size_t read_index) con
     return std::make_pair(buffer, m_data_size - read_index);
 }
 
-void bus::consume_read_index(std::size_t& read_index, std::size_t bytes) const
+std::size_t bus::consume_read_index(std::size_t read_index, std::size_t bytes) const
 {
-    read_index = (read_index + bytes) & m_data_size_mask;
+    return (read_index + bytes) & m_data_size_mask;
 }
 
-detail::mandatory_consumer_data* bus::open_mandatory_consumer(const uint8_t* id)
+volatile detail::mandatory_consumer_data* bus::open_mandatory_consumer(uint8_t id)
 {
     // make sure id is not zero
-    if(std::all_of(id, id + 16, [](uint8_t b) {return b == 0;}))
+    if(id == 0)
         throw zero_id();
 
-    detail::mandatory_consumer_data new_consumer_data(id, read_index());
-
-    detail::mandatory_consumer_data* empty_consumer(NULL);
+    volatile detail::mandatory_consumer_data* empty_consumer(NULL);
     for(unsigned int i = 0; i < m_meta->max_mandatory_consumers; ++i)
     {
         volatile detail::mandatory_consumer_data* consumer = m_meta->mandatory_consumers + i;
-        if(std::equal(id, id + 16, consumer->id))
-            return const_cast<detail::mandatory_consumer_data*>(consumer);
-        else if(not empty_consumer and std::all_of(consumer->id, consumer->id + 16, [](uint8_t b) {return b == 0;}))
-            empty_consumer = const_cast<detail::mandatory_consumer_data*>(consumer);
+        if(id == consumer->id)
+            return consumer;
+        else if(not empty_consumer and consumer->id == 0)
+            empty_consumer = consumer;
     }
-    *empty_consumer = new_consumer_data;
+    *empty_consumer = detail::mandatory_consumer_data(id, read_index());
     return empty_consumer;
 }
 
-void bus::close_mandatory_consumer(const detail::mandatory_consumer_data* data)
+void bus::close_mandatory_consumer(const volatile detail::mandatory_consumer_data* data)
 {
     volatile detail::mandatory_consumer_data* consumer = m_meta->mandatory_consumers + (data - m_meta->mandatory_consumers);
-    std::fill(consumer->id, consumer->id + 16, 0);
+    consumer->id = 0;
 }
 
 const volatile detail::meta_page* bus::meta_page() const

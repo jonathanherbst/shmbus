@@ -9,9 +9,9 @@ namespace shmbus {
 class mandatory_consumer
 {
 public:
-    mandatory_consumer(detail::create_, const std::string& bus_name, std::size_t size_exponent, const uint8_t* id);
+    mandatory_consumer(detail::create_, const std::string& bus_name, std::size_t size_exponent, uint8_t id);
 
-    mandatory_consumer(detail::open_, const std::string& bus_name, const uint8_t* id);
+    mandatory_consumer(detail::open_, const std::string& bus_name, uint8_t id);
 
     mandatory_consumer(const mandatory_consumer&) = delete;
 
@@ -33,7 +33,7 @@ public:
 
 private:
     bus m_bus;
-    detail::mandatory_consumer_data* m_data;
+    volatile detail::mandatory_consumer_data* m_data;
 };
 
 }
