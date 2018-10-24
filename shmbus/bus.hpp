@@ -30,8 +30,7 @@ struct meta_page
     static const std::size_t max_mandatory_consumers = 8;
 
     meta_page() :
-    write_index(0),
-    num_mandatory_consumers(0)
+    write_index(0)
     {}
 
     std::size_t write_index;

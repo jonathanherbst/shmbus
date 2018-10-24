@@ -13,15 +13,13 @@ namespace shmbus {
 namespace detail {
 
 mandatory_consumer_data::mandatory_consumer_data() :
-id{0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
+id(0)
 {}
 
-mandatory_consumer_data::mandatory_consumer_data(const uint8_t* id, std::size_t read_index) :
+mandatory_consumer_data::mandatory_consumer_data(uint8_t id, std::size_t read_index) :
+id(id),
 read_index(read_index)
-{
-    memcpy(this->id, id, 16);
-    //std::copy(this->id, this->id + 16, id);
-}
+{}
 
 }
 
@@ -83,7 +81,7 @@ std::pair<void*, std::size_t> bus::write_buffer()
     for(unsigned int i(0); i < m_meta->max_mandatory_consumers; ++i)
     {
         auto* consumer = m_meta->mandatory_consumers + i;
-        if(not std::all_of(consumer->id, consumer->id + 16, [](uint8_t v){return v == 0;}))
+        if(consumer->id != 0)
         {
             std::size_t read_index = consumer->read_index;
             if(read_index == 0 and m_meta->write_index >= 0)
@@ -135,7 +133,9 @@ volatile detail::mandatory_consumer_data* bus::open_mandatory_consumer(uint8_t i
         else if(not empty_consumer and consumer->id == 0)
             empty_consumer = consumer;
     }
-    *empty_consumer = detail::mandatory_consumer_data(id, read_index());
+
+    empty_consumer->id = id;
+    empty_consumer->read_index = read_index();
     return empty_consumer;
 }
 
