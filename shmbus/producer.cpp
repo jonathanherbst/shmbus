@@ -36,6 +36,9 @@ std::size_t producer::write_some(const void* data, std::size_t len)
         write_size += write_size2;
     }
 
+    // notify even if we didn't write anything to wake up the mandatory consumers.
+    m_bus.condition().notify_all();
+
     return write_size;
 }
 
