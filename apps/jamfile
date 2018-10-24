@@ -3,6 +3,13 @@ lib boost_system ;
 lib pthread ;
 lib rt ;
 
+exe mandatory_consume
+:   mandatory_consume.cpp
+    /shmbus//shmbus
+    pthread
+    rt
+;
+
 exe bus_info
 :   bus_info.cpp
     /shmbus//shmbus
