@@ -20,8 +20,8 @@ int main(int argc, char *argv[])
     std::cout << "write index: " << page->write_index << std::endl;
     for(int i = 0; i < page->max_mandatory_consumers; ++i)
     {
-        if(page->mandatory_consumers[i].id[15] != 0)
-            std::cout << "mandatory consumer " << page->mandatory_consumers[i].id[15] <<
+        if(page->mandatory_consumers[i].id != 0)
+            std::cout << "mandatory consumer " << page->mandatory_consumers[i].id <<
                 " read index " << page->mandatory_consumers[i].read_index << std::endl;
     }
 
