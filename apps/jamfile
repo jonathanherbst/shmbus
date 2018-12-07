@@ -17,6 +17,13 @@ exe bus_info
     rt
 ;
 
+exe destroy_bus
+:   destroy_bus.cpp
+    /shmbus//shmbus
+    pthread
+    rt
+;
+
 exe serial_producer
 :   serial_producer.cpp
     /shmbus//shmbus

@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     for(int i = 0; i < page->max_mandatory_consumers; ++i)
     {
         if(page->mandatory_consumers[i].id != 0)
-            std::cout << "mandatory consumer " << page->mandatory_consumers[i].id <<
+            std::cout << "mandatory consumer " << static_cast<int>(page->mandatory_consumers[i].id) <<
                 " read index " << page->mandatory_consumers[i].read_index << std::endl;
     }
 
