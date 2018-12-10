@@ -19,14 +19,16 @@ int main(int argc, char *argv[])
     {
         bus.wait_for_data(std::chrono::seconds(1));
 
-        const void* data;
-        std::size_t dataSize;
-        std::tie(data, dataSize) = bus.data();
+        const void* data1;
+        std::size_t dataSize1;
+        const void* data2;
+        std::size_t dataSize2;
+        std::tie(data1, dataSize1, data2, dataSize2) = bus.data();
 
-        if(dataSize > 0)
+        if(dataSize1 + dataSize2 > 0)
         {
-            std::cout << "got " << dataSize << " bytes" << std::endl;
-            bus.consume(dataSize);
+            std::cout << "got " << dataSize1 + dataSize2 << " bytes" << std::endl;
+            bus.consume(dataSize1 + dataSize2);
         }
     }
 

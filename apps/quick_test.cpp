@@ -47,18 +47,20 @@ void consumer()
     shmbus::consumer c(shmbus::open, name);
     while(true)
     {
-        const void* data;
-        std::size_t dataSize;
-        std::tie(data, dataSize) = c.data();
-        if(dataSize == 0)
+        const void* data1;
+        std::size_t dataSize1;
+        const void* data2;
+        std::size_t dataSize2;
+        std::tie(data1, dataSize1, data2, dataSize2) = c.data();
+        if(dataSize1 == 0)
         {
             std::cout << "waiting" << std::endl;
             c.wait(boost::get_system_time() + boost::posix_time::seconds(1));
         }
         else
         {
-            std::cout << "rx " << dataSize << " bytes" << std::endl;
-            c.consume(dataSize);
+            std::cout << "rx " << dataSize1 + dataSize2 << " bytes" << std::endl;
+            c.consume(dataSize1 + dataSize2);
         }
     }
 }

@@ -74,25 +74,31 @@ bus::condition_type& bus::condition()
     return m_condition;
 }
 
-std::pair<void*, std::size_t> bus::write_buffer()
+std::tuple<void*, std::size_t, void*, std::size_t> bus::write_buffer()
 {
-    // find the max index from the mandatory consumers
-    std::size_t max_index = m_data_size;
+    // find the max size of the writable section of the buffer
+    std::size_t max_size = m_data_size;
     for(unsigned int i(0); i < m_meta->max_mandatory_consumers; ++i)
     {
         auto* consumer = m_meta->mandatory_consumers + i;
         if(consumer->id != 0)
         {
             std::size_t read_index = consumer->read_index;
-            if(read_index == 0 and m_meta->write_index >= 0)
-                max_index = std::min(max_index, m_data_size - 1);
+            if(read_index == 0)
+                max_size = std::min(max_size, m_data_size - m_meta->write_index - 1);
             else if(read_index > m_meta->write_index)
-                max_index = std::min(max_index, read_index - 1);
+                max_size = std::min(max_size, read_index - m_meta->write_index - 1);
+            else
+                max_size = std::min(max_size, (m_data_size - m_meta->write_index) + read_index - 1);
         }
     }
 
-    void* buffer = static_cast<uint8_t*>(m_data) + m_meta->write_index;
-    return std::make_pair(buffer, max_index - m_meta->write_index);
+    std::size_t contig_size = m_data_size - m_meta->write_index;
+    void* buffer1 = static_cast<uint8_t*>(m_data) + m_meta->write_index;
+    std::size_t size1 = max_size > contig_size ? contig_size : max_size;
+    void* buffer2 = static_cast<uint8_t*>(m_data);
+    std::size_t size2 = max_size > contig_size ? max_size - contig_size : 0;
+    return std::make_tuple(buffer1, size1, buffer2, size2);
 }
 
 void bus::commit(std::size_t bytes)
@@ -105,12 +111,13 @@ std::size_t bus::read_index() const
     return m_meta->write_index;
 }
 
-std::pair<const void*, std::size_t> bus::read_buffer(std::size_t read_index) const
+std::tuple<const void*, std::size_t, const void*, std::size_t> bus::read_buffer(std::size_t read_index) const
 {
-    const void* buffer = static_cast<const uint8_t*>(m_data) + read_index;
+    const void* buffer1 = static_cast<const uint8_t*>(m_data) + read_index;
+    const void* buffer2 = static_cast<const uint8_t*>(m_data);
     if(read_index <= m_meta->write_index)
-        return std::make_pair(buffer, m_meta->write_index - read_index);
-    return std::make_pair(buffer, m_data_size - read_index);
+        return std::make_tuple(buffer1, m_meta->write_index - read_index, buffer2, 0);
+    return std::make_tuple(buffer1, m_data_size - read_index, buffer2, m_meta->write_index);
 }
 
 std::size_t bus::consume_read_index(std::size_t read_index, std::size_t bytes) const

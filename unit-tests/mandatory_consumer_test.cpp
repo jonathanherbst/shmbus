@@ -10,12 +10,11 @@ BOOST_AUTO_TEST_CASE(MandatoryConsumerPreventsProducer)
 {
     shmbus::bus::destroy("test");
 
-    uint8_t mcId[16] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0xa, 0xb, 0xc, 0xd, 0xe, 0xf};
-    uint8_t data[1024];
+    uint8_t data[1023];
 
     {
-        shmbus::producer producer(shmbus::create, "test", 5);
-        shmbus::mandatory_consumer consumer(shmbus::open, "test", mcId);
+        shmbus::producer producer(shmbus::create, "test", 9);
+        shmbus::mandatory_consumer consumer(shmbus::open, "test", 1);
 
         BOOST_CHECK_GT(producer.write_some(data, sizeof(data)), 0ul);
         BOOST_CHECK_EQUAL(producer.write_some(data, sizeof(data)),  0ul);

@@ -19,7 +19,7 @@ public:
 
     void wait_for_data(const std::chrono::microseconds& timeout);
 
-    std::pair<const void*, std::size_t> data() const;
+    std::tuple<const void*, std::size_t, const void*, std::size_t> data() const;
 
     void consume(std::size_t s);
 
